@@ -1,4 +1,3 @@
-// import createError from "http-errors";
 import createError from "http-errors";
 import express from "express";
 import cookieParser from "cookie-parser";

@@ -32,7 +32,7 @@ export const deleteContact = (req, res) => {
     .removeContact(id)
     .then((deletedContact) => {
       if (deletedContact) {
-        res.status(200).json({ message: "Contact deleted successfully" });
+        res.status(200).json(deletedContact);
       } else {
         res.status(404).json({ message: "Not found" });
       }
@@ -45,32 +45,40 @@ export const createContact = (req, res) => {
   if (error) {
     throw new HttpError(400, error.message);
   }
-  const newContact = req.body;
+  const { name, email, phone } = req.body;
   contactsService
-    .addContact(newContact)
+    .addContact(name, email, phone)
     .then((createdContact) => res.status(201).json(createdContact))
     .catch((err) => res.status(500).json({ message: err.message }));
 };
 
-export const updateContact = (req, res) => {
+export const updateContact = async (req, res) => {
   const id = req.params.id;
   const updatedContactData = req.body;
-  const { error } = updateContactSchema.validate(req.body);
-  if (error) {
-    throw new HttpError(400, error.message);
-  }
-  contactsService
-    .updateContact(
+
+  try {
+    if (Object.keys(updatedContactData).length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Body must have at least one field" });
+    }
+
+    const { error } = updateContactSchema.validate(updatedContactData);
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    const updatedContact = await contactsService.updateContact(
       id,
-      updatedContactData.name,
-      updatedContactData.email,
-      updatedContactData.phone
-    )
-    .then((updatedContact) => {
-      if (!updatedContact) {
-        throw new HttpError(404, "Not found");
-      }
-      res.status(200).json(updatedContact);
-    })
-    .catch((err) => res.status(500).json({ message: err.message }));
+      updatedContactData
+    );
+
+    if (!updatedContact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.status(200).json(updatedContact);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
