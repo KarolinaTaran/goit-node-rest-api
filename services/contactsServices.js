@@ -47,16 +47,21 @@ async function addContact(name, email, phone) {
   }
 }
 
-async function updateContact(id, name, email, phone) {
+async function updateContact(id, updatedContactData) {
   try {
     const contacts = await listContacts();
     const index = contacts.findIndex((contact) => contact.id === id);
     if (index === -1) return null;
-    const updatedContact = { id, name, email, phone };
-    contacts[index] = updatedContact;
+    const existingContact = contacts[index];
+    const updatedFields = {};
+    Object.keys(updatedContactData).forEach((key) => {
+      if (existingContact[key] !== updatedContactData[key]) {
+        updatedFields[key] = updatedContactData[key];
+      }
+    });
+    Object.assign(existingContact, updatedFields);
     await saveContacts(contacts);
-    console.log(updatedContact, id, email, phone, name);
-    return updatedContact;
+    return updatedFields;
   } catch (error) {
     throw new Error(`Unable to update contact: ${error}`);
   }
