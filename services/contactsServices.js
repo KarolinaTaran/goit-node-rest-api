@@ -53,15 +53,9 @@ async function updateContact(id, updatedContactData) {
     const index = contacts.findIndex((contact) => contact.id === id);
     if (index === -1) return null;
     const existingContact = contacts[index];
-    const updatedFields = {};
-    Object.keys(updatedContactData).forEach((key) => {
-      if (existingContact[key] !== updatedContactData[key]) {
-        updatedFields[key] = updatedContactData[key];
-      }
-    });
-    Object.assign(existingContact, updatedFields);
+    Object.assign(existingContact, updatedContactData);
     await saveContacts(contacts);
-    return updatedFields;
+    return existingContact;
   } catch (error) {
     throw new Error(`Unable to update contact: ${error}`);
   }
