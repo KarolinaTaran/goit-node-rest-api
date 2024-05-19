@@ -4,8 +4,10 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 
 import usersRouter from "./routes/contactsRouter.js";
+import "./db/contacts.js";
+const app = express();
 
-var app = express();
+const PORT = process.env.PORT || 8080;
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -32,6 +34,6 @@ app.use(function (err, req, res, next) {
   });
 });
 
-app.listen(8080, () => {
-  console.log("Server started on port 8080");
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 });
