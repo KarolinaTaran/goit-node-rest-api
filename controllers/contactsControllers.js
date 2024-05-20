@@ -1,12 +1,11 @@
 import * as contactsService from "../services/contactsServices.js";
 import { createContactSchema } from "../schemas/contactsSchemas.js";
 import Contact from "../models/contact.js";
+import mongoose from "mongoose";
 
 export const getAllContacts = async (req, res) => {
   try {
-    console.log("Fetching all contacts");
     const contacts = await Contact.find();
-    console.log(contacts);
     res.status(200).json(contacts);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -15,6 +14,11 @@ export const getAllContacts = async (req, res) => {
 
 export const getOneContact = async (req, res) => {
   const id = req.params.id;
+
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
   try {
     const contact = await Contact.findById(id);
     if (contact) {
