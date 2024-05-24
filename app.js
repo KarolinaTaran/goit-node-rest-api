@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 
 import usersRouter from "./routes/contactsRouter.js";
+import userRouter from "./routes/users.js";
 import "./db/contacts.js";
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use("/api/contacts", usersRouter);
+app.use("/users", userRouter);
 app.use(function (req, res, next) {
   next(createError(404));
 });
