@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 export const getAllContacts = async (req, res) => {
   try {
-    const contacts = await Contact.find();
+    const contacts = await Contact.find({ owner: req.user.id });
     res.status(200).json(contacts);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -20,7 +20,7 @@ export const getOneContact = async (req, res) => {
   }
 
   try {
-    const contact = await Contact.findById(id);
+    const contact = await Contact.findOne({ _id: id, owner: req.user.id });
     if (contact) {
       res.status(200).json(contact);
     } else {
@@ -34,7 +34,10 @@ export const getOneContact = async (req, res) => {
 export const deleteContact = async (req, res) => {
   const id = req.params.id;
   try {
-    const deletedContact = await Contact.findByIdAndDelete(id);
+    const deletedContact = await Contact.findOneAndDelete({
+      _id: id,
+      owner: req.user.id,
+    });
     if (deletedContact) {
       res.status(200).json(deletedContact);
     } else {
@@ -63,6 +66,7 @@ export const createContact = async (req, res) => {
       name,
       email,
       phone,
+      owner: req.user.id,
     });
 
     const createdContact = await newContact.save();
@@ -77,8 +81,8 @@ export const updateContact = async (req, res) => {
   const updatedContactData = req.body;
 
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(
-      id,
+    const updatedContact = await Contact.findOneAndUpdate(
+      { _id: id, owner: req.user.id },
       updatedContactData,
       { new: true }
     );
@@ -98,8 +102,8 @@ export const updateFavoriteStatus = async (req, res) => {
   const { favorite } = req.body;
 
   try {
-    const updatedContact = await Contact.findByIdAndUpdate(
-      id,
+    const updatedContact = await Contact.findOneAndUpdate(
+      { _id: id, owner: req.user.id },
       { favorite },
       { new: true }
     );
