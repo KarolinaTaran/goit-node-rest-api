@@ -2,11 +2,14 @@ import createError from "http-errors";
 import express from "express";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import path from "path";
 
 import usersRouter from "./routes/contactsRouter.js";
 import userRouter from "./routes/users.js";
 import "./db/contacts.js";
 const app = express();
+
+app.use("/avatars", express.static(path.resolve("public/avatars")));
 
 const PORT = process.env.PORT || 8080;
 

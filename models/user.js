@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import gravatar from "gravatar";
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,6 +21,12 @@ const userSchema = new mongoose.Schema(
     token: {
       type: String,
       default: null,
+    },
+    avatarURL: {
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, { s: "200", r: "pg", d: "mm" });
+      },
     },
   },
   {

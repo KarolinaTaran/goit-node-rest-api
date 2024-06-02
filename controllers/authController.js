@@ -3,6 +3,10 @@ import User from "../models/user.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import gravatar from "gravatar";
+import jimp from "jimp";
+import { v4 as uuidv4 } from "uuid";
+
 dotenv.config();
 
 const registerSchema = Joi.object({
@@ -30,14 +34,16 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ message: "Email in use" });
     }
-
-    const user = new User({ email, password });
+    const avatarURL = gravatar.url(email, { s: "200", r: "pg", d: "mm" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword, avatarURL });
     await user.save();
 
     res.status(201).json({
       user: {
         email: user.email,
         subscription: user.subscription,
+        avatarURL: user.avatarURL,
       },
     });
   } catch (err) {
@@ -67,7 +73,14 @@ export const login = async (req, res) => {
 
     user.token = token;
     await user.save();
-    res.send({ token });
+    // res.send({ token });
+    res.status(200).json({
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Internal server error" });
@@ -102,7 +115,42 @@ export const currentUser = async (req, res) => {
     res.status(200).json({
       email: user.email,
       subscription: user.subscription,
+      avatarURL: user.avatarURL,
     });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const fileName = `${uuidv4()}_${req.file.originalname}`;
+
+    const tmpFilePath = req.file.path;
+
+    const targetFilePath = path.join("public", "avatars", fileName);
+
+    await jimp
+      .read(tmpFilePath)
+      .then((image) => image.resize(250, 250).write(targetFilePath));
+
+    fs.unlinkSync(tmpFilePath);
+
+    const fileUrl = path.join("/avatars", req.file.filename);
+    user.avatarURL = fileUrl;
+    await user.save();
+
+    res.status(200).json({ avatarURL: fileUrl });
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
