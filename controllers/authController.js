@@ -146,7 +146,7 @@ export const updateAvatar = async (req, res) => {
 
     fs.unlinkSync(tmpFilePath);
 
-    const fileUrl = path.join("/avatars", req.file.filename);
+    const fileUrl = path.join("/avatars", req.file.fileName);
     user.avatarURL = fileUrl;
     await user.save();
 
