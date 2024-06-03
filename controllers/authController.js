@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import gravatar from "gravatar";
 import jimp from "jimp";
 import { v4 as uuidv4 } from "uuid";
+import path from "path";
+import fs from "fs";
 
 dotenv.config();
 
@@ -146,12 +148,13 @@ export const updateAvatar = async (req, res) => {
 
     fs.unlinkSync(tmpFilePath);
 
-    const fileUrl = path.join("/avatars", req.file.fileName);
+    const fileUrl = path.join("/avatars", fileName).replace(/\\/g, "/");
     user.avatarURL = fileUrl;
     await user.save();
 
     res.status(200).json({ avatarURL: fileUrl });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
