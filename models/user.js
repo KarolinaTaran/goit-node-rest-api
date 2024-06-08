@@ -28,6 +28,14 @@ const userSchema = new mongoose.Schema(
         return gravatar.url(this.email, { s: "200", r: "pg", d: "mm" });
       },
     },
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     versionKey: false,

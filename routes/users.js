@@ -5,6 +5,8 @@ import {
   logout,
   currentUser,
   updateAvatar,
+  verifyEmail,
+  resendVerificationEmail,
 } from "../controllers/authController.js";
 import auth from "../middlewares/auth.js";
 
@@ -23,5 +25,7 @@ router.get("/current", auth, currentUser);
 const upload = multer({ dest: "public/avatars" });
 
 router.patch("/avatars", auth, upload.single("avatar"), updateAvatar);
+router.get("/verify/:verificationToken", auth, verifyEmail);
+router.post("/verify", auth, resendVerificationEmail);
 
 export default router;
